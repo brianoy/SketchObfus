@@ -41,13 +41,14 @@ def obfuscate_cpp_with_regex(input_file, output_file):
             # C++ 內建類型
             'void', 'int', 'char', 'short', 'long', 'float', 'double',
             'signed', 'unsigned', 'bool', 'wchar_t', 'size_t', 'byte',
+            'String', 'uint8_t', 'uint16_t',
             
             # Arduino 特定函數和常量
             'setup', 'loop', 'pinMode', 'digitalWrite', 'digitalRead', 
             'analogWrite', 'analogRead', 'delay', 'delayMicroseconds',
             'millis', 'micros', 'map', 'random', 'randomSeed', 'attachInterrupt',
             'detachInterrupt', 'interrupts', 'noInterrupts', 'Serial', 'print',
-            'println', 'available', 'read', 'write', 'begin', 'end',
+            'println', 'available', 'read', 'write', 'begin', 'end', 'random8',
             
             # Arduino 常量
             'HIGH', 'LOW', 'INPUT', 'OUTPUT', 'INPUT_PULLUP',
@@ -62,11 +63,18 @@ def obfuscate_cpp_with_regex(input_file, output_file):
             'shiftOut', 'shiftIn', 'pulseIn', 'tone', 'noTone',
             
             # Arduino 類別
-            'Servo', 'Wire', 'LiquidCrystal', 'SoftwareSerial', 'SD', 'Ethernet'
+            'Servo', 'Wire', 'LiquidCrystal', 'SoftwareSerial', 'SD', 'Ethernet',
+
+            # Fastled
+            'FastLED', 'CRGB', 'CRGBPalette16','DEFINE_GRADIENT_PALETTE','blend','show', 'CHSV', 'qsub8', 'qadd8', 'HeatColor', 'ColorFromPalette',
+
+            # BT
+            'BluetoothSerial'
         ])
+
         
         # 1. 識別 Arduino 物件宣告
-        obj_pattern = r'(\b(?:Servo|Wire|LiquidCrystal|SoftwareSerial|SD|Ethernet)\b)\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        obj_pattern = r'(\b(?:Servo|Wire|LiquidCrystal|SoftwareSerial|SD|Ethernet|CRGB|CRGBPalette16|BluetoothSerial)\b)\s+([a-zA-Z_][a-zA-Z0-9_]*)'
         obj_matches = re.finditer(obj_pattern, code_without_comments)
         for match in obj_matches:
             obj_type = match.group(1)
@@ -75,7 +83,7 @@ def obfuscate_cpp_with_regex(input_file, output_file):
                 name_mapping[obj_name] = generate_obfuscated_name()
         
         # 2. 識別函數名和參數
-        func_pattern = r'(void|int|float|double|char|bool|byte|COROUTINE)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)'
+        func_pattern = r'(void|int|float|double|char|bool|byte|COROUTINE|String|uint8_t|uint16_t|)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)'
         func_matches = re.finditer(func_pattern, code_without_comments)
         for match in func_matches:
             func_name = match.group(2)
@@ -86,7 +94,7 @@ def obfuscate_cpp_with_regex(input_file, output_file):
             param_str = match.group(3)
             if param_str:
                 # 改進的參數匹配，處理各種類型
-                param_pattern = r'(?:int|float|double|char|bool|byte|unsigned\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,|$)'
+                param_pattern = r'(?:int|float|double|char|bool|byte|String|uint8_t|uint16_t|unsigned\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,|$)'
                 param_matches = re.finditer(param_pattern, param_str)
                 for param_match in param_matches:
                     param_name = param_match.group(1)
@@ -101,9 +109,10 @@ def obfuscate_cpp_with_regex(input_file, output_file):
             if param_name not in name_mapping and param_name not in reserved_names:
                 name_mapping[param_name] = generate_obfuscated_name()
         
+        
         # 4. 識別普通變數
         var_patterns = [
-            r'(const\s+)?(int|float|double|char|bool|byte|static\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:=|\[|;)',
+            r'(const\s+)?(int|float|double|char|bool|String|uint8_t|uint16_t|byte|static\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:=|\[|;)',
             r'static\s+int\s+([a-zA-Z_][a-zA-Z0-9_]*)',
             r'int\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\d+\](?:\[\d+\])?\s*=',
             r'\bfor\s*\(\s*int\s+([a-zA-Z_][a-zA-Z0-9_]*)',
@@ -144,7 +153,7 @@ def obfuscate_cpp_with_regex(input_file, output_file):
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(obfuscated_code)
         
-        print(f"使用正則表達式方法成功混淆! 結果已寫入 {output_file}")
+        print(f"結果已寫入 {output_file}")
         print(f"共混淆了 {len(name_mapping)} 個變數名和函數名")
         
         # 可選：輸出映射表供參考 (按原始名稱字母排序)
