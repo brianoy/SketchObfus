@@ -28,21 +28,77 @@ def obfuscate_cpp_with_regex(input_file, output_file):
         code_without_comments = remove_comments(code)
         
         # 完整的 C++ 關鍵字和 Arduino 保留名稱列表
+        # 注意: set需要每個element用逗號連接，如果少逗號不會出現error，會忽略掉逗號後方的元素
+        # A set requires each element to be separated by a comma. 
+        # If a comma is missing, no error will occur, but the element after the missing comma will be ignored.
+
         reserved_names = set([
-            # C++ 關鍵字
-            'if', 'else', 'for', 'while', 'do', 'break', 'continue', 'return',
-            'switch', 'case', 'default', 'goto', 'try', 'catch', 'throw',
-            'new', 'delete', 'this', 'class', 'struct', 'union', 'enum',
-            'template', 'typedef', 'typename', 'namespace', 'using', 'public',
-            'private', 'protected', 'virtual', 'static', 'const', 'volatile',
-            'auto', 'register', 'extern', 'inline', 'explicit', 'friend',
-            'operator', 'sizeof', 'asm', 'export', 'true', 'false', 'nullptr',
-            
-            # C++ 內建類型
-            'void', 'int', 'char', 'short', 'long', 'float', 'double',
-            'signed', 'unsigned', 'bool', 'wchar_t', 'size_t', 'byte',
-            'String', 'uint8_t', 'uint16_t',
-            
+
+            # C++ 保留字
+            'alignas', 'alignof', 'and', 'and_eq', 'asm',
+            'auto', 'bitand', 'bitor', 'bool', 'break',
+            'case', 'catch', 'char', 'char16_t', 'char32_t',
+            'class', 'compl', 'const', 'constexpr', 'const_cast',
+            'continue', 'decltype', 'default', 'delete', 'do',
+            'double', 'dynamic_cast', 'else', 'enum', 'explicit',
+            'export', 'extern', 'false', 'float', 'for',
+            'friend', 'goto', 'if', 'inline', 'int',
+            'long', 'mutable', 'namespace', 'new', 'noexcept',
+            'not', 'not_eq', 'nullptr', 'operator', 'or',
+            'or_eq', 'private', 'protected', 'public', 'register',
+            'reinterpret_cast', 'return', 'short', 'signed', 'sizeof',
+            'static', 'static_assert', 'static_cast', 'struct', 'switch',
+            'template', 'this', 'thread_local', 'throw', 'true',
+            'try', 'typedef', 'typeid', 'typename', 'union',
+            'unsigned', 'using', 'virtual', 'void', 'volatile',
+            'wchar_t', 'while', 'xor', 'xor_eq', 'size_t', 'byte','String','uint8_t','uint16_t','uint32_t',
+
+            # cstring headers
+            'memcpy', 'memmove', 'memset', 'memcmp',
+            'strcpy', 'strncpy', 'strcat', 'strncat',
+            'strcmp', 'strncmp', 'strchr', 'strrchr',
+            'strstr', 'strlen', 'strspn', 'strcspn',
+            'strpbrk', 'strtok', 'strerror',
+
+            # cstdlib
+            'malloc', 'calloc', 'realloc', 'free',
+            'abort', 'exit', 'atexit', 'system',
+            'getenv', 'atoi', 'atol', 'atoll',
+            'strtod', 'strtof', 'strtold',
+            'strtol', 'strtoll', 'strtoul', 'strtoull',
+            'rand', 'srand', 'abs', 'labs', 'llabs',
+            'div', 'ldiv', 'lldiv', 'bsearch', 'qsort',
+
+            # cstdio
+            'printf', 'fprintf', 'sprintf', 'snprintf',
+            'vprintf', 'vfprintf', 'vsprintf', 'vsnprintf',
+            'scanf', 'fscanf', 'sscanf',
+            'fopen', 'freopen', 'fclose',
+            'fflush', 'setbuf', 'setvbuf',
+            'fread', 'fwrite', 'fgetc', 'fgets',
+            'fputc', 'fputs', 'getc', 'getchar',
+            'gets', 'putc', 'putchar', 'puts',
+            'ungetc', 'fseek', 'ftell', 'rewind',
+            'fgetpos', 'fsetpos', 'clearerr',
+            'feof', 'ferror', 'perror', 'remove',
+            'rename', 'tmpfile', 'tmpnam',
+
+            # cmath
+            'acos', 'asin', 'atan', 'atan2',
+            'cos', 'sin', 'tan',
+            'acosh', 'asinh', 'atanh',
+            'cosh', 'sinh', 'tanh',
+            'exp', 'frexp', 'ldexp',
+            'log', 'log10', 'modf',
+            'exp2', 'expm1', 'ilogb', 'log1p',
+            'log2', 'logb', 'scalbn', 'scalbln',
+            'pow', 'sqrt', 'cbrt', 'hypot',
+            'fabs', 'abs', 'fmod', 'remainder',
+            'remquo', 'fma', 'fmax', 'fmin',
+            'fdim', 'nan', 'nearbyint', 'rint',
+            'lrint', 'llrint', 'round', 'lround',
+            'llround', 'trunc', 'ceil', 'floor',
+
             # Arduino 特定函數和常量
             'setup', 'loop', 'pinMode', 'digitalWrite', 'digitalRead', 
             'analogWrite', 'analogRead', 'delay', 'delayMicroseconds',
@@ -66,35 +122,47 @@ def obfuscate_cpp_with_regex(input_file, output_file):
             'Servo', 'Wire', 'LiquidCrystal', 'SoftwareSerial', 'SD', 'Ethernet',
 
             # Fastled
-            'FastLED', 'CRGB', 'CRGBPalette16','DEFINE_GRADIENT_PALETTE','blend','show', 'CHSV', 'qsub8', 'qadd8', 'HeatColor', 'ColorFromPalette',
+            'FastLED', 'CRGB', 'CRGBPalette16','DEFINE_GRADIENT_PALETTE','blend','show',
+            'CHSV', 'qsub8', 'qadd8', 'HeatColor', 'ColorFromPalette',
 
             # BT
-            'BluetoothSerial'
+            'BluetoothSerial',
+
+            # RFID
+            'Adafruit_PN532','begin','SAMConfig','getFirmwareVersion','sendCommandCheckAck',
+            'writeGPIO','readGPIO','setPassiveActivationRetries','readPassiveTargetID',
+            'startPassiveTargetIDDetection','readDetectedPassiveTargetID','inDataExchange',
+            'inListPassiveTarget','AsTarget','getDataTarget','setDataTarget','reboot',
+            'UnlockBackdoor','mifareclassic_IsFirstBlock','mifareclassic_IsTrailerBlock',
+            'mifareclassic_AuthenticateBlock','mifareclassic_ReadDataBlock','mifareclassic_WriteDataBlock',
+            'mifareclassic_FormatNDEF','mifareclassic_WriteNDEFURI','mifareultralight_ReadPage',
+            'mifareultralight_WritePage','ntag2xx_ReadPage','ntag2xx_WritePage','ntag2xx_WriteNDEFURI',
+            'PrintHex','PrintHexChar'
         ])
 
         
         # 1. 識別 Arduino 物件宣告
-        obj_pattern = r'(\b(?:Servo|Wire|LiquidCrystal|SoftwareSerial|SD|Ethernet|CRGB|CRGBPalette16|BluetoothSerial)\b)\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        obj_pattern = r'(\b(?:Servo|Wire|LiquidCrystal|SoftwareSerial|SD|Ethernet|CRGB|CRGBPalette16|BluetoothSerial|Adafruit_PN532)\b)\s+([a-zA-Z_][a-zA-Z0-9_]*)'
         obj_matches = re.finditer(obj_pattern, code_without_comments)
         for match in obj_matches:
             obj_type = match.group(1)
             obj_name = match.group(2)
             if obj_name not in name_mapping and obj_name not in reserved_names:
                 name_mapping[obj_name] = generate_obfuscated_name()
-        
+
         # 2. 識別函數名和參數
-        func_pattern = r'(void|int|float|double|char|bool|byte|COROUTINE|String|uint8_t|uint16_t|)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)'
+        func_pattern = r'(void|int|float|double|char|bool|byte|COROUTINE|String|uint8_t|uint16_t|uint32_t|#define)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)'
         func_matches = re.finditer(func_pattern, code_without_comments)
         for match in func_matches:
             func_name = match.group(2)
             if func_name not in name_mapping and func_name not in reserved_names:
                 name_mapping[func_name] = generate_obfuscated_name()
-            
+
             # 處理函數參數
             param_str = match.group(3)
             if param_str:
                 # 改進的參數匹配，處理各種類型
-                param_pattern = r'(?:int|float|double|char|bool|byte|String|uint8_t|uint16_t|unsigned\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,|$)'
+                param_pattern = r'(?:int|float|double|char|bool|byte|String|uint8_t|uint16_t|uint32_t|unsigned\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,|$)'
                 param_matches = re.finditer(param_pattern, param_str)
                 for param_match in param_matches:
                     param_name = param_match.group(1)
@@ -111,8 +179,9 @@ def obfuscate_cpp_with_regex(input_file, output_file):
         
         
         # 4. 識別普通變數
+        # function 內的變數定義
         var_patterns = [
-            r'(const\s+)?(int|float|double|char|bool|String|uint8_t|uint16_t|byte|static\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:=|\[|;)',
+            r'(const\s+)?(int|float|double|char|bool|String|uint8_t|uint16_t|uint32_t|byte|static\s+int)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:=|\[|;)',
             r'static\s+int\s+([a-zA-Z_][a-zA-Z0-9_]*)',
             r'int\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\d+\](?:\[\d+\])?\s*=',
             r'\bfor\s*\(\s*int\s+([a-zA-Z_][a-zA-Z0-9_]*)',
