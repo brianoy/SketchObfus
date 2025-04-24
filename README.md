@@ -22,13 +22,14 @@ Just scrambles your arduino code variable names to make the code harder to read.
 
 ## 🚀 Usage
 
-1. Clone this project
+### 1. via python interpreter
+(1) Clone this project
 
 ```bash
 git clone https://github.com/brianoy/SketchObfus.git
 ```
 
-2. Start obfuscated
+(2) Start obfuscated the code
 
 ```bash
 python SketchObfus.py your_sketch.ino
@@ -40,6 +41,42 @@ You can also specify a custom output filename:
 
 ```bash
 python SketchObfus.py your_sketch.ino obfuscated_output.ino
+```
+
+---
+
+### 2. via cmd command
+
+download link here
+
+(1) Clone this project
+
+```bash
+git clone https://github.com/brianoy/SketchObfus.git
+```
+
+(2) Compile the python script
+
+```bash
+pip install auto-py-to-exe
+```
+
+```bash
+pyinstaller --noconfirm --onefile --console .\SketchObfus.py
+```
+ 
+(3) Start obfuscated the code
+   
+You will see the exe file under dist folder, open a cmd window and execute it by:
+
+```bash
+SketchObfus.exe your_sketch.ino
+```
+
+You can also specify a custom output filename:
+
+```bash
+SketchObfus.exe your_sketch.ino obfuscated_output.ino
 ```
 
 ## 📁 Example
