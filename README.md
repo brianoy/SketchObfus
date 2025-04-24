@@ -47,7 +47,10 @@ python SketchObfus.py your_sketch.ino obfuscated_output.ino
 
 ### 2. via cmd command
 
-download link here
+[windowds11-x64 binary download](https://github.com/brianoy/SketchObfus/releases/latest)
+
+sha3-256: c68340ad75639286f7da76d63add825329a2d4bc962095543354194827565f21
+
 
 (1) Clone this project
 
@@ -60,6 +63,8 @@ git clone https://github.com/brianoy/SketchObfus.git
 ```bash
 pip install auto-py-to-exe
 ```
+
+###### Compiling with "Nuitka" may cause Windows Defender to flag the generated .exe as a malicious file, use pyinstaller instead.
 
 ```bash
 pyinstaller --noconfirm --onefile --console .\SketchObfus.py
@@ -113,3 +118,4 @@ void _0x6D9C7A2E() {
 
 - Not suitable for sketches that rely on external macro-generated names or dynamically referenced variables.
 - Does not analyze code semantically — relies solely on regex patterns.
+
