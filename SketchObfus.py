@@ -217,10 +217,25 @@ def obfuscate_cpp_with_regex(input_file, output_file):
         
         # 移除所有註釋
         obfuscated_code = remove_comments(obfuscated_code)
-        
+        prefix = '''/*
+ *  ╔═══════════════════════════════════════════════╗
+ *  ║                                               ║
+ *  ║   ██████╗ ██████╗ ███████╗██╗   ██╗███████╗   ║
+ *  ║  ██╔═══██╗██╔══██╗██╔════╝██║   ██║██╔════╝   ║
+ *  ║  ██║   ██║██████╔╝█████╗  ██║   ██║███████╗   ║
+ *  ║  ██║   ██║██╔══██╗██╔══╝  ██║   ██║╚════██║   ║
+ *  ║  ╚██████╔╝██████╔╝██║     ╚██████╔╝███████║   ║
+ *  ║   ╚═════╝ ╚═════╝ ╚═╝      ╚═════╝ ╚══════╝   ║
+ *  ║                                               ║
+ *  ║        THIS CODE HAS BEEN OBFUSCATED          ║
+ *  ║                                               ║
+ *  ╚═══════════════════════════════════════════════╝
+ */
+ 
+ '''
         # 寫入輸出文件 - 不添加註釋
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(obfuscated_code)
+            f.write(prefix + obfuscated_code)
         
         print(f"結果已寫入 {output_file}")
         print(f"共混淆了 {len(name_mapping)} 個變數名和函數名")
