@@ -1,5 +1,5 @@
 # SketchObfus
-- Just scrambles your arduino code variable names to make the code harder to read.
+
 - Focused on what it does best: making things slightly uglier.
 - This program relies on Regex to "detect" variable/function names, rather than using a Abstract Syntax Tree.
   
