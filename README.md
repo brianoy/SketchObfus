@@ -104,10 +104,10 @@ void loop() {
 After:
 ```cpp
 int _0xA3B1C2D4 = 13;
-void _0x1F9A3B7C() {
+void setup() {
   pinMode(_0xA3B1C2D4, OUTPUT);
 }
-void _0x6D9C7A2E() {
+void loop() {
   digitalWrite(_0xA3B1C2D4, HIGH);
   delay(1000);
   digitalWrite(_0xA3B1C2D4, LOW);
